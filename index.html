@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+</head>
+<body>
+<p id="some"></p>
+<p id="all"></p>
+
+<script src="https://cdn.jsdelivr.net/npm/clingo-wasm@0.1.1"></script>
+<script>
+  async function main() {
+    await clingo.init("https://cdn.jsdelivr.net/npm/clingo-wasm@0.1.1/dist/clingo.wasm")
+    let res = await clingo.run("a;b. c;d :- b. e.", 0);
+    console.log(res.Result == "SATISFIABLE");
+    //console.log(await clingo.run("{a; b; c}.", 0));
+  }
+
+  async function sig(lp, o) {
+    await clingo.init("https://cdn.jsdelivr.net/npm/clingo-wasm@0.1.1/dist/clingo.wasm")
+    let p = o.charAt(0) == '+'
+    let n = o.charAt(0) == '-'
+    if (!(p || n)) { return; }
+
+    if (p) { 
+	let r = " :- not " + o.slice(1) + ".";
+	let res = await clingo.run(lp + r);
+	let b = res.Result == "SATISFIABLE";
+	document.getElementById("some").innerHTML = o + " confirmed by some: " + b;
+	r = " :- " + o.slice(1) + ".";
+	res = await clingo.run(lp + r);
+	let c = res.Result != "SATISFIABLE";
+	document.getElementById("all").innerHTML = o + " confirmed by all: " + c;
+    }
+  }
+
+    sig('a;b. c;d :- b. e.', '+a');
+</script>
+
+    test
+    <button onclick="sig('a;b. c;d :- b. e.', '+a')">
+        Click Here!
+    </button>
+</body>
+</html>
